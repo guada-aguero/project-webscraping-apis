@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Route and Music Recommender Results</title>
+    <style>
+        #map {
+            height: 500px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>Travel Details</h1>
+    <p><strong>Travel Time:</strong> {{ travel_time }}</p>
+    <p><strong>Weather at Destination:</strong> {{ weather_info }}</p>
+    <div id="map"></div>
+    <h2>Route Steps</h2>
+    <ol>
+        {% for step in route_steps %}
+        <li>{{ step }}</li>
+        {% endfor %}
+    </ol>
+    <h2>Music Recommendations</h2>
+    <ul>
+        {% for track in recommendations %}
+        <li>{{ track.artist }} - {{ track.track }}</li>
+        {% endfor %}
+    </ul>
+    <h2>Historical Facts about {{ destination }}</h2>
+    <p>{{ destination_history }}</p>
+    {% if destination_image %}
+    <h2>Image of {{ destination }}</h2>
+    <img src="{{ destination_image }}" alt="Image of {{ destination }}" style="max-width: 100%;">
+    {% endif %}
+    {% if warning %}
+    <p><strong>Warning:</strong> {{ warning }}</p>
+    {% endif %}
+    <script>
+        function initMap() {
+            var directionsService = new google.maps.DirectionsService();
+            var directionsRenderer = new google.maps.DirectionsRenderer();
+            var map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 7,
+                center: {lat: {{ origin_lat }}, lng: {{ origin_lng }}}
+            });
+            directionsRenderer.setMap(map);
+
+            var start = new google.maps.LatLng({{ origin_lat }}, {{ origin_lng }});
+            var end = new google.maps.LatLng({{ destination_lat }}, {{ destination_lng }});
+            var request = {
+                origin: start,
+                destination: end,
+                travelMode: 'DRIVING'
+            };
+            directionsService.route(request, function(result, status) {
+                if (status == 'OK') {
+                    directionsRenderer.setDirections(result);
+                } else {
+                    alert('Directions request failed due to ' + status);
+                }
+            });
+        }
+    </script>
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key={{ api_key }}&callback=initMap">
+    </script>
+</body>
+</html>
